@@ -57,19 +57,19 @@
         _buttonLetteringSpacing = FLT_MIN;
         [self sizeToFit];
     }
-
+    
     return self;
 }
 
 - (TOPasscodeCircleButton *)makeCircleButtonWithNumber:(NSInteger)number letteringString:(NSString *)letteringString
 {
     NSString *numberString = [NSString stringWithFormat:@"%ld", (long)number];
-
+    
     TOPasscodeCircleButton *circleButton = [[TOPasscodeCircleButton alloc] initWithNumberString:numberString letteringString:letteringString];
     circleButton.backgroundImage = self.buttonImage;
     circleButton.hightlightedBackgroundImage = self.tappedButtonImage;
     circleButton.vibrancyEffect = self.vibrancyEffect;
-
+    
     // Add handler for when button is tapped
     __weak typeof(self) weakSelf = self;
     circleButton.buttonTappedHandler = ^{
@@ -77,43 +77,43 @@
             weakSelf.buttonTappedHandler(number);
         }
     };
-
+    
     return circleButton;
 }
 
 - (void)setUpButtons
 {
     NSMutableArray *buttons = [NSMutableArray array];
-
+    
     NSInteger numberOfButtons = 11; // 1-9 are normal, 10 is the vertical '0', 11 is the horizontal '0'
     NSArray *letteredTitles = @[@"ABC", @"DEF", @"GHI", @"JKL",
                                 @"MNO", @"PQRS", @"TUV", @"WXYZ"];
-
+    
     for (NSInteger i = 0; i < numberOfButtons; i++) {
         // Work out the button number text
         NSInteger buttonNumber = i + 1;
         if (buttonNumber == 10 || buttonNumber == 11) { buttonNumber = 0; }
-
+        
         // Work out the lettering text
         NSString *letteringString = nil;
-        if (self.showLettering && i > 0 && i-1 < letteredTitles.count) { // (Skip 1 and 0)
-            letteringString = letteredTitles[i-1];
-        }
-
+        /*
+         if (self.showLettering && i > 0 && i-1 < letteredTitles.count) { // (Skip 1 and 0)
+         letteringString = letteredTitles[i-1];
+         }
+         */
+        
         // Create a new button and add it to this view
         TOPasscodeCircleButton *circleButton = [self makeCircleButtonWithNumber:buttonNumber letteringString:letteringString];
         [self addSubview:circleButton];
         [buttons addObject:circleButton];
         
-        if (!self.showLettering) {
-            circleButton.buttonLabel.verticallyCenterNumberLabel = YES; // Center the digit in the middle
-        }
-
+        circleButton.buttonLabel.verticallyCenterNumberLabel = YES;
+        
         // Hang onto the 0 button if it's the vertical one
         // And center the text
         if (i == 9) {
             self.verticalZeroButton = circleButton;
-
+            
             // Hide the button if it's not vertically laid out
             if (self.horizontalLayout) {
                 self.verticalZeroButton.contentAlpha = 0.0f;
@@ -122,7 +122,7 @@
         }
         else if (i == 10) {
             self.horizontalZeroButton = circleButton;
-
+            
             // Hide the button if it's not horizontally laid out
             if (!self.horizontalLayout) {
                 self.horizontalZeroButton.contentAlpha = 0.0f;
@@ -130,14 +130,14 @@
             }
         }
     }
-
+    
     _keypadButtons = [NSArray arrayWithArray:buttons];
 }
 
 - (void)sizeToFit
 {
     CGFloat padding = 2.0f;
-
+    
     CGRect frame = self.frame;
     if (self.horizontalLayout) {
         frame.size.width  = ((self.buttonDiameter + padding) * 4) + (self.buttonSpacing.width * 3);
@@ -153,7 +153,7 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-
+    
     NSInteger i = 0;
     CGPoint origin = CGPointZero;
     for (TOPasscodeCircleButton *button in self.keypadButtons) {
@@ -161,46 +161,46 @@
         CGRect frame = button.frame;
         frame.origin = origin;
         button.frame = frame;
-
+        
         // Work out the next offset
         CGFloat horizontalOffset = frame.size.width + self.buttonSpacing.width;
         origin.x += horizontalOffset;
-
+        
         i++;
-
+        
         // If we're at the end of the row, move to the next one
         if (i % 3 == 0) {
             origin.x = 0.0f;
             origin.y = origin.y + frame.size.height + self.buttonSpacing.height;
         }
     }
-
+    
     // Lay out the vertical button
     CGRect frame = self.verticalZeroButton.frame;
     frame.origin.x += (frame.size.width + self.buttonSpacing.width);
     self.verticalZeroButton.frame = frame;
-
+    
     // Lay out the horizontal button
     frame = self.horizontalZeroButton.frame;
     frame.origin.x = (frame.size.width + self.buttonSpacing.width) * 3.0f;
     frame.origin.y = frame.size.height + self.buttonSpacing.height;
     self.horizontalZeroButton.frame = frame;
-
+    
     // Layout the accessory buttons
     CGFloat midPointY = CGRectGetMidY(self.verticalZeroButton.frame);
-
+    
     if (self.leftAccessoryView) {
         CGRect leftButtonFrame = self.keypadButtons.firstObject.frame;
         CGFloat midPointX = CGRectGetMidX(leftButtonFrame);
-
+        
         [self.leftAccessoryView sizeToFit];
         self.leftAccessoryView.center = (CGPoint){midPointX, midPointY};
     }
-
+    
     if (self.rightAccessoryView) {
         CGRect rightButtonFrame = self.keypadButtons[2].frame;
         CGFloat midPointX = CGRectGetMidX(rightButtonFrame);
-
+        
         [self.rightAccessoryView sizeToFit];
         self.rightAccessoryView.center = (CGPoint){midPointX, midPointY};
     }
@@ -211,7 +211,7 @@
 {
     if (vibrancyEffect == _vibrancyEffect) { return; }
     _vibrancyEffect = vibrancyEffect;
-
+    
     for (TOPasscodeCircleButton *button in self.keypadButtons) {
         button.vibrancyEffect = _vibrancyEffect;
     }
@@ -221,18 +221,18 @@
 - (UIImage *)buttonImage
 {
     if (!_buttonImage) {
-        _buttonImage = [TOPasscodeCircleImage hollowCircleImageOfSize:self.buttonDiameter strokeWidth:self.buttonStrokeWidth padding:1.0f];
+        _buttonImage = [TOPasscodeCircleImage circleImageOfSize:self.buttonDiameter inset:self.buttonStrokeWidth * 0.5f padding:1.0f antialias:NO];
     }
-
+    
     return _buttonImage;
 }
 
 - (UIImage *)tappedButtonImage
 {
     if (!_tappedButtonImage) {
-        _tappedButtonImage = [TOPasscodeCircleImage circleImageOfSize:self.buttonDiameter inset:self.buttonStrokeWidth * 0.5f padding:1.0f antialias:YES];
+        _tappedButtonImage = [TOPasscodeCircleImage circleImageOfSize:self.buttonDiameter inset:self.buttonStrokeWidth * 0.5f padding:1.0f antialias:NO];
     }
-
+    
     return _tappedButtonImage;
 }
 
@@ -261,36 +261,36 @@
     if (horizontalLayout== _horizontalLayout) {
         return;
     }
-
+    
     _horizontalLayout = horizontalLayout;
-
+    
     // Resize itself now so the frame value is up to date externally
     [self sizeToFit];
-
+    
     // Set initial animation state
     self.verticalZeroButton.hidden = NO;
     self.horizontalZeroButton.hidden = NO;
-
+    
     self.verticalZeroButton.contentAlpha = _horizontalLayout ? 1.0f : 0.0f;
     self.horizontalZeroButton.contentAlpha = _horizontalLayout ? 0.0f : 1.0f;
-
+    
     void (^animationBlock)(void) = ^{
-        self.verticalZeroButton.contentAlpha = self.horizontalLayout ? 0.0f : 1.0f;
-        self.horizontalZeroButton.contentAlpha = self.horizontalLayout ? 1.0f : 0.0f;
+        self.verticalZeroButton.contentAlpha = _horizontalLayout ? 0.0f : 1.0f;
+        self.horizontalZeroButton.contentAlpha = _horizontalLayout ? 1.0f : 0.0f;
     };
-
+    
     void (^completionBlock)(BOOL) = ^(BOOL complete) {
-        self.verticalZeroButton.hidden = self.horizontalLayout;
-        self.horizontalZeroButton.hidden = self.horizontalLayout;
+        self.verticalZeroButton.hidden = _horizontalLayout;
+        self.horizontalZeroButton.hidden = !_horizontalLayout;
     };
-
+    
     // Don't animate if not needed
     if (!animated) {
         animationBlock();
         completionBlock(YES);
         return;
     }
-
+    
     // Perform animation
     [UIView animateWithDuration:duration animations:animationBlock completion:completionBlock];
 }
@@ -307,12 +307,8 @@
         circleButton.tintColor = self.buttonBackgroundColor;
         circleButton.textColor = self.buttonTextColor;
         circleButton.highlightedTextColor = self.buttonHighlightedTextColor;
-        if (!_showLettering) {
-            circleButton.buttonLabel.letteringLabel.text = nil;
-            circleButton.buttonLabel.verticallyCenterNumberLabel = YES;
-        }
     }
-
+    
     [self setNeedsLayout];
 }
 
@@ -416,7 +412,7 @@
 - (void)setContentAlpha:(CGFloat)contentAlpha
 {
     _contentAlpha = contentAlpha;
-
+    
     for (TOPasscodeCircleButton *button in self.keypadButtons) {
         // Skip whichever '0' button is not presently being used
         if ((self.horizontalLayout && button == self.verticalZeroButton) ||
@@ -424,7 +420,7 @@
         {
             continue;
         }
-
+        
         button.contentAlpha = contentAlpha;
     }
 }

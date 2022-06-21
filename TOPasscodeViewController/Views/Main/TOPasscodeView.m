@@ -417,26 +417,31 @@
     self.keypadView.buttonDiameter = contentLayout.circleButtonDiameter;
 }
 
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
+    
+    // Update the theme style.
+    [self applyThemeForStyle: self.style];
+}
+
 - (void)applyThemeForStyle:(TOPasscodeViewStyle)style
 {
     BOOL isTranslucent = TOPasscodeViewStyleIsTranslucent(style);
-    BOOL isDark = TOPasscodeViewStyleIsDark(style);
+    BOOL isDark = self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
     
     // Set title label color
     UIColor *titleLabelColor = self.titleLabelColor;
     if (titleLabelColor == nil) {
-        titleLabelColor = isDark ? [UIColor whiteColor] : [UIColor blackColor];
+        titleLabelColor = [UIColor labelColor];
     }
     self.titleLabel.textColor = titleLabelColor;
     
     // Add/remove the translucency effect to the buttons
     if (isTranslucent) {
-        UIBlurEffect *blurEffect = [self blurEffectForStyle:style];
+        UIBlurEffect *blurEffect = [self blurEffectForStyle:isDark];
         UIVibrancyEffect *vibrancyEffect = [UIVibrancyEffect effectForBlurEffect:blurEffect];
         self.inputField.visualEffectView.effect = vibrancyEffect;
         self.keypadView.vibrancyEffect = vibrancyEffect;
-    }
-    else {
+    } else {
         self.inputField.visualEffectView.effect = nil;
         self.keypadView.vibrancyEffect = nil;
     }
@@ -444,7 +449,7 @@
     // Set keyboard style of the input field
     self.inputField.keyboardAppearance = isDark ? UIKeyboardAppearanceDark : UIKeyboardAppearanceDefault;
     
-    UIColor *defaultTintColor = isDark ? [UIColor colorWithWhite:0.85 alpha:1.0f] : [UIColor colorWithWhite:0.3 alpha:1.0f];
+    UIColor *defaultTintColor = [UIColor systemBackgroundColor];
     
     // Set the tint color of the circle row view
     UIColor *circleRowColor = self.inputProgressViewTintColor;
@@ -463,19 +468,14 @@
     // Set the color of the keypad button labels
     UIColor *buttonTextColor = self.keypadButtonTextColor;
     if (buttonTextColor == nil) {
-        buttonTextColor = isDark ? [UIColor whiteColor] : [UIColor blackColor];
+        buttonTextColor = [UIColor labelColor];
     }
     self.keypadView.buttonTextColor = buttonTextColor;
     
     // Set the highlight color of the keypad button
     UIColor *buttonHighlightedTextColor = self.keypadButtonHighlightedTextColor;
     if (buttonHighlightedTextColor == nil) {
-        if (isTranslucent) {
-            buttonHighlightedTextColor = isDark ? nil : [UIColor whiteColor];
-        }
-        else {
-            buttonHighlightedTextColor = isDark ? [UIColor blackColor] : [UIColor whiteColor];
-        }
+        buttonHighlightedTextColor = [UIColor labelColor];
     }
     self.keypadView.buttonHighlightedTextColor = buttonHighlightedTextColor;
 }
@@ -492,14 +492,13 @@
 }
 
 #pragma mark - Internal Style Management -
-- (UIBlurEffect *)blurEffectForStyle:(TOPasscodeViewStyle)style
+- (UIBlurEffect *)blurEffectForStyle:(BOOL)isDark
 {
-    switch (style) {
-        case TOPasscodeViewStyleTranslucentDark:
+    switch (isDark) {
+        case YES:
             return [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
-        case TOPasscodeViewStyleTranslucentLight:
-            return [UIBlurEffect effectWithStyle:UIBlurEffectStyleExtraLight];
-        default: return nil;
+        default:
+            return [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
     }
     
     return nil;

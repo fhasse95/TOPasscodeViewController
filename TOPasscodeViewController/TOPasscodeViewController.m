@@ -56,7 +56,7 @@
         _passcodeType = type;
         [self setUp];
     }
-
+    
     return self;
 }
 
@@ -65,7 +65,7 @@
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
         [self setUp];
     }
-
+    
     return self;
 }
 
@@ -79,37 +79,37 @@
 - (void)setUp
 {
     self.transitioningDelegate = self;
+    self.view.backgroundColor = [UIColor clearColor];
     self.automaticallyPromptForBiometricValidation = NO;
-    self.allowCancel = YES;
-
+    
     if (TOPasscodeViewStyleIsTranslucent(self.style)) {
         self.modalPresentationStyle = UIModalPresentationOverFullScreen;
     }
     else {
         self.modalPresentationStyle = UIModalPresentationFullScreen;
     }
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChangeFrame:)
-                                                     name:UIKeyboardWillChangeFrameNotification object:nil];
+                                                 name:UIKeyboardWillChangeFrameNotification object:nil];
 }
 
 - (void)setUpBackgroundEffectViewForStyle:(TOPasscodeViewStyle)style
 {
     BOOL translucent = TOPasscodeViewStyleIsTranslucent(style);
-
+    
     // Return if it already exists when it should
     if (translucent && self.backgroundEffectView) { return; }
-
+    
     // Return if it doesn't exist when it shouldn't
     if (!translucent && !self.backgroundEffectView) { return; }
-
+    
     // Remove it if we're now opaque
     if (!translucent) {
         [self.backgroundEffectView removeFromSuperview];
         self.backgroundEffectView = nil;
         return;
     }
-
+    
     // Create it otherwise
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:[self blurEffectStyleForStyle:style]];
     self.backgroundEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
@@ -121,17 +121,17 @@
 - (void)setUpBackgroundViewForStyle:(TOPasscodeViewStyle)style
 {
     BOOL translucent = TOPasscodeViewStyleIsTranslucent(style);
-
+    
     if (!translucent && self.backgroundView) { return; }
-
+    
     if (translucent && !self.backgroundView) { return; }
-
+    
     if (translucent) {
         [self.backgroundView removeFromSuperview];
         self.backgroundView = nil;
         return;
     }
-
+    
     self.backgroundView = [[UIView alloc] initWithFrame:self.view.bounds];
     self.backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view insertSubview:self.backgroundView atIndex:0];
@@ -139,12 +139,14 @@
 
 - (UIBlurEffectStyle)blurEffectStyleForStyle:(TOPasscodeViewStyle)style
 {
-    switch (self.style) {
-        case TOPasscodeViewStyleTranslucentDark: return UIBlurEffectStyleDark;
-        case TOPasscodeViewStyleTranslucentLight: return UIBlurEffectStyleExtraLight;
-        default: return 0;
+    BOOL isDark = self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    switch (isDark) {
+        case YES:
+            return UIBlurEffectStyleDark;
+        default:
+            return UIBlurEffectStyleLight;
     }
-
+    
     return 0;
 }
 
@@ -152,12 +154,12 @@
 {
     UIFont *buttonFont = [UIFont systemFontOfSize:16.0f];
     BOOL isPad = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
-
+    
     if (!self.leftAccessoryButton && self.allowBiometricValidation && !self.biometricButton) {
         self.biometricButton = [UIButton buttonWithType:UIButtonTypeSystem];
         [self.biometricButton setTitle:TOPasscodeBiometryTitleForType(self.biometryType) forState:UIControlStateNormal];
         [self.biometricButton addTarget:self action:@selector(accessoryButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-
+        
         if (isPad) {
             self.passcodeView.leftButton = self.biometricButton;
         }
@@ -171,15 +173,12 @@
             self.biometricButton = nil;
         }
     }
-
+    
     if (!self.rightAccessoryButton && !self.cancelButton) {
         self.cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
-        [self.cancelButton setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
+        [self.cancelButton setTitle:NSLocalizedString(@"cancel_button", @"") forState:UIControlStateNormal];
         self.cancelButton.titleLabel.font = buttonFont;
         [self.cancelButton addTarget:self action:@selector(accessoryButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        // If cancelling is disabled, we hide the cancel button but we still create it, because it can
-        // transition to backspace after user input.
-        self.cancelButton.hidden = !self.allowCancel;
         if (isPad) {
             self.passcodeView.rightButton = self.cancelButton;
         }
@@ -193,7 +192,7 @@
             self.cancelButton = nil;
         }
     }
-
+    
     [self updateAccessoryButtonFontsForSize:self.view.bounds.size];
 }
 
@@ -201,7 +200,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor clearColor];
     self.view.layer.allowsGroupOpacity = NO;
     [self setUpBackgroundEffectViewForStyle:self.style];
     [self setUpBackgroundViewForStyle:self.style];
@@ -212,7 +210,7 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-
+    
     // Automatically trigger biometric validation if available
     if (self.allowBiometricValidation && self.automaticallyPromptForBiometricValidation) {
         [self accessoryButtonTapped:self.biometricButton];
@@ -244,12 +242,12 @@
     frame.origin.x = (bounds.width - frame.size.width) * 0.5f;
     frame.origin.y = ((bounds.height - self.keyboardHeight) - frame.size.height) * 0.5f;
     self.passcodeView.frame = CGRectIntegral(frame);
-
+    
     // --------------------------------------------------
-
+    
     // Update the accessory button sizes
     [self updateAccessoryButtonFontsForSize:maxSize];
-
+    
     // Re-layout the accessory buttons
     [self layoutAccessoryButtonsForSize:maxSize];
 }
@@ -258,13 +256,13 @@
 {
     [super viewWillAppear:animated];
     [self setNeedsStatusBarAppearanceUpdate];
-
+    
     // Force an initial layout if the view hasn't been presented yet
     [UIView performWithoutAnimation:^{
         [self.view setNeedsLayout];
         [self.view layoutIfNeeded];
     }];
-
+    
     // Show the keyboard if we're entering alphanumeric characters
     if (self.passcodeType == TOPasscodeTypeCustomAlphanumeric) {
         [self.passcodeView.inputField becomeFirstResponder];
@@ -274,7 +272,7 @@
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-
+    
     // Dismiss the keyboard if it is visible
     if (self.passcodeView.inputField.isFirstResponder) {
         [self.passcodeView.inputField resignFirstResponder];
@@ -283,20 +281,31 @@
 
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
-    return TOPasscodeViewStyleIsDark(self.style) ? UIStatusBarStyleLightContent : UIStatusBarStyleDefault;
+    BOOL isDark = self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    return isDark ? UIStatusBarStyleLightContent : UIStatusBarStyleDefault;
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
+    
+    // Update the theme style.
+    self.backgroundView = nil;
+    self.backgroundEffectView = nil;
+    [self setUpBackgroundEffectViewForStyle:self.style];
+    [self setUpBackgroundViewForStyle:self.style];
+    [self applyThemeForStyle: self.style];
 }
 
 #pragma mark - View Rotations -
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-
+    
     // We don't need to do anything special on iPad or if we're using character input
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad || self.passcodeType == TOPasscodeTypeCustomAlphanumeric) { return; }
-
+    
     // Work out if we need to transition to horizontal
     BOOL horizontalLayout = size.height < size.width;
-
+    
     // Perform layout animation
     [self.passcodeView setHorizontalLayout:horizontalLayout animated:coordinator.animated duration:coordinator.transitionDuration];
 }
@@ -305,18 +314,18 @@
 - (void)applyThemeForStyle:(TOPasscodeViewStyle)style
 {
     BOOL isDark = TOPasscodeViewStyleIsDark(style);
-
+    
     // Apply the tint color to the accessory buttons
     UIColor *accessoryTintColor = self.accessoryButtonTintColor;
     if (!accessoryTintColor) {
-        accessoryTintColor = isDark ? [UIColor whiteColor] : nil;
+        accessoryTintColor = [UIColor labelColor];
     }
-
+    
     self.biometricButton.tintColor = accessoryTintColor;
     self.cancelButton.tintColor = accessoryTintColor;
     self.leftAccessoryButton.tintColor = accessoryTintColor;
     self.rightAccessoryButton.tintColor = accessoryTintColor;
-
+    
     self.backgroundView.backgroundColor = isDark ? [UIColor colorWithWhite:0.1f alpha:1.0f] : [UIColor whiteColor];
 }
 
@@ -326,7 +335,7 @@
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         width = MIN(size.width, size.height);
     }
-
+    
     CGFloat pointSize = 17.0f;
     if (width < TOPasscodeViewContentSizeMedium) {
         pointSize = 14.0f;
@@ -334,9 +343,9 @@
     else if (width < TOPasscodeViewContentSizeDefault) {
         pointSize = 16.0f;
     }
-
+    
     UIFont *accessoryFont = [UIFont systemFontOfSize:pointSize];
-
+    
     self.biometricButton.titleLabel.font = accessoryFont;
     self.cancelButton.titleLabel.font = accessoryFont;
     self.leftAccessoryButton.titleLabel.font = accessoryFont;
@@ -346,7 +355,7 @@
 - (void)verticalLayoutAccessoryButtonsForSize:(CGSize)size
 {
     CGFloat width = MIN(size.width, size.height);
-
+    
     CGFloat verticalInset = 54.0f;
     if (width < TOPasscodeViewContentSizeMedium) {
         verticalInset = 37.0f;
@@ -354,7 +363,7 @@
     else if (width < TOPasscodeViewContentSizeDefault) {
         verticalInset = 43.0f;
     }
-
+    
     CGFloat inset = self.passcodeView.keypadButtonInset;
     CGPoint point = (CGPoint){0.0f, (self.view.bounds.size.height - self.keyboardHeight) - verticalInset};
     if (@available(iOS 11.0, *)) {
@@ -363,13 +372,13 @@
             point.y -= safeAreaInsets.bottom;
         }
     }
-
+    
     if (self.leftButton) {
         [self.leftButton sizeToFit];
         point.x = self.passcodeView.frame.origin.x + inset;
         self.leftButton.center = point;
     }
-
+    
     if (self.rightButton) {
         [self.rightButton sizeToFit];
         point.x = CGRectGetMaxX(self.passcodeView.frame) - inset;
@@ -389,7 +398,7 @@
     else if (width < TOPasscodeViewContentSizeDefault) {
         verticalInset = 35.0f;
     }
-
+    
     if (self.leftButton) {
         [self.leftButton sizeToFit];
         CGRect frame = self.leftButton.frame;
@@ -397,7 +406,7 @@
         frame.origin.x = (CGRectGetMaxX(passcodeViewFrame) - buttonInset) - (frame.size.width * 0.5f);
         self.leftButton.frame = CGRectIntegral(frame);
     }
-
+    
     if (self.rightButton) {
         [self.rightButton sizeToFit];
         CGRect frame = self.rightButton.frame;
@@ -405,7 +414,7 @@
         frame.origin.x = (CGRectGetMaxX(passcodeViewFrame) - buttonInset) - (frame.size.width * 0.5f);
         self.rightButton.frame = CGRectIntegral(frame);
     }
-
+    
     [self.view bringSubviewToFront:self.rightButton];
     [self.view bringSubviewToFront:self.leftButton];
 }
@@ -414,7 +423,7 @@
 {
     // The buttons are always embedded in the keypad view on iPad
     if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPhone) { return; }
-
+    
     if (self.passcodeView.horizontalLayout && self.passcodeType != TOPasscodeTypeCustomAlphanumeric) {
         [self horizontalLayoutAccessoryButtonsForSize:size];
     }
@@ -433,7 +442,7 @@
             [self keypadButtonTapped];
             return;
         }
-
+        
         if ([self.delegate respondsToSelector:@selector(didTapCancelInPasscodeViewController:)]) {
             [self.delegate didTapCancelInPasscodeViewController:self];
         }
@@ -447,18 +456,11 @@
 
 - (void)keypadButtonTapped
 {
-    NSString *title = nil;
-    if (self.passcodeView.passcode.length > 0) {
-        title = NSLocalizedString(@"Delete", @"Delete");
-    } else if (self.allowCancel) {
-        title = NSLocalizedString(@"Cancel", @"Cancel");
-    }
+    NSString *title = self.passcodeView.passcode.length > 0 ?
+    NSLocalizedString(@"delete_button", @"") :
+    NSLocalizedString(@"cancel_button", @"");
     [UIView performWithoutAnimation:^{
-        if (title != nil) {
-            [self.cancelButton setTitle:title forState:UIControlStateNormal];
-            [self.cancelButton layoutIfNeeded];
-        }
-        self.cancelButton.hidden = (title == nil);
+        [self.cancelButton setTitle:title forState:UIControlStateNormal];
     }];
 }
 
@@ -467,17 +469,17 @@
     if (![self.delegate respondsToSelector:@selector(passcodeViewController:isCorrectCode:)]) {
         return;
     }
-
+    
     // Validate the code
     BOOL isCorrect = [self.delegate passcodeViewController:self isCorrectCode:passcode];
     if (!isCorrect) {
         [self.passcodeView resetPasscodeAnimated:YES playImpact:YES];
         return;
     }
-
+    
     // Hang onto the fact the passcode was successful to play a nicer dismissal animation
     self.passcodeSuccess = YES;
-
+    
     // Perform handler if correctly entered
     if ([self.delegate respondsToSelector:@selector(didInputCorrectPasscodeInPasscodeViewController:)]) {
         [self.delegate didInputCorrectPasscodeInPasscodeViewController:self];
@@ -494,18 +496,18 @@
     CGRect keyboardFrame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGFloat animationDuration = [notification.userInfo[UIKeyboardAnimationDurationUserInfoKey] floatValue];
     UIViewAnimationOptions animationCurve = [notification.userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
-
+    
     // Work out the on-screen height of the keyboard
     self.keyboardHeight = self.view.bounds.size.height - keyboardFrame.origin.y;
     self.keyboardHeight = MAX(self.keyboardHeight, 0.0f);
-
+    
     // Set that the view needs to be laid out
     [self.view setNeedsLayout];
-
+    
     if (animationDuration < FLT_EPSILON) {
         return;
     }
-
+    
     // Animate the content sliding up and down with the keyboard
     [UIView animateWithDuration:animationDuration
                           delay:0.0f
@@ -542,29 +544,28 @@
 - (TOPasscodeView *)passcodeView
 {
     if (_passcodeView) { return _passcodeView; }
-
     _passcodeView = [[TOPasscodeView alloc] initWithStyle:self.style passcodeType:self.passcodeType];
     _passcodeView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin |
-                                    UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+    UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
     [_passcodeView sizeToFit];
     _passcodeView.center = self.view.center;
     [self.view addSubview:_passcodeView];
-
+    
     __weak typeof(self) weakSelf = self;
     _passcodeView.passcodeCompletedHandler = ^(NSString *passcode) {
         [weakSelf didCompleteEnteringPasscode:passcode];
     };
-
+    
     _passcodeView.passcodeDigitEnteredHandler = ^{
         [weakSelf keypadButtonTapped];
     };
-
+    
     // Set initial layout to horizontal if we're rotated on an iPhone
     if (self.passcodeType != TOPasscodeTypeCustomAlphanumeric && UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
         CGSize boundsSize = self.view.bounds.size;
         _passcodeView.horizontalLayout = boundsSize.width > boundsSize.height;
     }
-
+    
     return _passcodeView;
 }
 
@@ -572,7 +573,7 @@
 {
     if (style == _style) { return; }
     _style = style;
-
+    
     self.passcodeView.style = style;
     [self setUpBackgroundEffectViewForStyle:style];
 }
@@ -582,7 +583,7 @@
     if (_allowBiometricValidation == allowBiometricValidation) {
         return;
     }
-
+    
     _allowBiometricValidation = allowBiometricValidation;
     [self setUpAccessoryButtons];
     [self applyThemeForStyle:self.style];
@@ -602,14 +603,9 @@
 
 - (UIColor *)inputProgressViewTintColor { return self.passcodeView.inputProgressViewTintColor; }
 
-- (void)setKeypadButtonBackgroundTintColor:(UIColor *)keypadButtonBackgroundTintColor
+- (void)setkeypadButtonBackgroundTintColor:(UIColor *)keypadButtonBackgroundTintColor
 {
     self.passcodeView.keypadButtonBackgroundColor = keypadButtonBackgroundTintColor;
-}
-
-- (void)setKeypadButtonShowLettering:(BOOL)keypadButtonShowLettering
-{
-    self.passcodeView.keypadView.showLettering = keypadButtonShowLettering;
 }
 
 - (UIColor *)keypadButtonBackgroundTintColor { return self.passcodeView.keypadButtonBackgroundColor; }
@@ -655,32 +651,32 @@
 {
     if (hidden == _contentHidden) { return; }
     _contentHidden = hidden;
-
+    
     void (^setViewsHiddenBlock)(BOOL) = ^(BOOL hidden) {
         self.passcodeView.hidden = hidden;
         self.leftButton.hidden = hidden;
         self.rightButton.hidden = hidden;
     };
-
+    
     void (^completionBlock)(BOOL) = ^(BOOL complete) {
         setViewsHiddenBlock(hidden);
     };
-
+    
     if (!animated) {
         completionBlock(YES);
         return;
     }
-
+    
     // Make sure the views are visible before the animation
     setViewsHiddenBlock(NO);
-
+    
     void (^animationBlock)(void) = ^{
         CGFloat alpha = hidden ? 0.0f : 1.0f;
         self.passcodeView.contentAlpha = alpha;
         self.leftButton.alpha = alpha;
         self.rightButton.alpha = alpha;
     };
-
+    
     // Animate
     [UIView animateWithDuration:0.4f animations:animationBlock completion:completionBlock];
 }
