@@ -90,6 +90,15 @@
     
     // Configure the theme of all of the views
     [self applyThemeForStyle:_style];
+    
+    // Add a default title view
+    UIImageView *imageView = [[UIImageView alloc] initWithFrame: CGRectMake(0, 0, 55, 55)];
+    [imageView setImage: [UIImage imageNamed:@"AppIcon"]];
+    [imageView setContentMode: UIViewContentModeScaleAspectFit];
+    imageView.layer.cornerRadius = 10;
+    imageView.layer.masksToBounds = YES;
+    [self addSubview: imageView];
+    self.titleView = imageView;
 }
 
 #pragma mark - View Layout -
