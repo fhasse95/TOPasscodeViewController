@@ -97,20 +97,11 @@
 {
     BOOL translucent = TOPasscodeViewStyleIsTranslucent(style);
     
-    // Return if it already exists when it should
-    if (translucent && self.backgroundEffectView) { return; }
+    // Remove the previous background effect view.
+    [self.backgroundEffectView removeFromSuperview];
+    self.backgroundEffectView = nil;
     
-    // Return if it doesn't exist when it shouldn't
-    if (!translucent && !self.backgroundEffectView) { return; }
-    
-    // Remove it if we're now opaque
-    if (!translucent) {
-        [self.backgroundEffectView removeFromSuperview];
-        self.backgroundEffectView = nil;
-        return;
-    }
-    
-    // Create it otherwise
+    // Create it a new background effect view.
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:[self blurEffectStyleForStyle:style]];
     self.backgroundEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
     self.backgroundEffectView.frame = self.view.bounds;
@@ -288,11 +279,7 @@
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
     
     // Update the theme style.
-    self.backgroundView = nil;
-    self.backgroundEffectView = nil;
-    [self setUpBackgroundEffectViewForStyle:self.style];
-    [self setUpBackgroundViewForStyle:self.style];
-    [self applyThemeForStyle: self.style];
+    [self setStyle: self.style];
 }
 
 #pragma mark - View Rotations -
@@ -571,9 +558,6 @@
 
 - (void)setStyle:(TOPasscodeViewStyle)style
 {
-    if (style == _style) { return; }
-    _style = style;
-    
     self.passcodeView.style = style;
     [self setUpBackgroundEffectViewForStyle:style];
 }

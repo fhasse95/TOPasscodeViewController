@@ -426,12 +426,6 @@
     self.keypadView.buttonDiameter = contentLayout.circleButtonDiameter;
 }
 
-- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
-    
-    // Update the theme style.
-    [self applyThemeForStyle: self.style];
-}
-
 - (void)applyThemeForStyle:(TOPasscodeViewStyle)style
 {
     BOOL isTranslucent = TOPasscodeViewStyleIsTranslucent(style);
@@ -548,8 +542,6 @@
 
 - (void)setStyle:(TOPasscodeViewStyle)style
 {
-    if (style == _style) { return; }
-    _style = style;
     [self applyThemeForStyle:style];
 }
 
