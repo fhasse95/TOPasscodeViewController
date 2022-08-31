@@ -49,6 +49,16 @@
 
 #pragma mark - Instance Creation -
 
+- (instancetype)initWithType:(TOPasscodeType)type
+{
+    if (self = [super initWithNibName:nil bundle:nil]) {
+        _passcodeType = type;
+        [self setUp];
+    }
+    
+    return self;
+}
+
 - (instancetype)initWithStyle:(TOPasscodeViewStyle)style passcodeType:(TOPasscodeType)type
 {
     if (self = [super initWithNibName:nil bundle:nil]) {
