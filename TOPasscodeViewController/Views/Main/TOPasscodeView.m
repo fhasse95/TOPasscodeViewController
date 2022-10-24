@@ -76,6 +76,7 @@
 {
     // Set up default properties
     self.userInteractionEnabled = YES;
+    
     _defaultContentLayout = [TOPasscodeViewContentLayout defaultScreenContentLayout];
     _currentLayout = _defaultContentLayout;
     _contentLayouts = @[[TOPasscodeViewContentLayout mediumScreenContentLayout],
@@ -442,12 +443,14 @@
     if (isTranslucent) {
         UIBlurEffect *blurEffect = [self blurEffectForStyle:isDark];
         UIVibrancyEffect *vibrancyEffect = [UIVibrancyEffect effectForBlurEffect:blurEffect];
-        self.inputField.visualEffectView.effect = vibrancyEffect;
         self.keypadView.vibrancyEffect = vibrancyEffect;
     } else {
-        self.inputField.visualEffectView.effect = nil;
         self.keypadView.vibrancyEffect = nil;
     }
+    
+    UIBlurEffect *inputBlurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemUltraThinMaterial];
+    UIVibrancyEffect *inputVibrancyEffect = [UIVibrancyEffect effectForBlurEffect:inputBlurEffect];
+    self.inputField.visualEffectView.effect = inputVibrancyEffect;
     
     // Set keyboard style of the input field
     self.inputField.keyboardAppearance = isDark ? UIKeyboardAppearanceDark : UIKeyboardAppearanceDefault;
@@ -478,7 +481,7 @@
     // Set the highlight color of the keypad button
     UIColor *buttonHighlightedTextColor = self.keypadButtonHighlightedTextColor;
     if (buttonHighlightedTextColor == nil) {
-        buttonHighlightedTextColor = [UIColor labelColor];
+        buttonHighlightedTextColor = [UIColor tertiaryLabelColor];
     }
     self.keypadView.buttonHighlightedTextColor = buttonHighlightedTextColor;
 }

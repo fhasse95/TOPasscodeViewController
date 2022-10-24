@@ -49,10 +49,11 @@
 
 #pragma mark - Instance Creation -
 
-- (instancetype)initWithType:(TOPasscodeType)type
+- (instancetype)initWithType:(TOPasscodeType)type allowCancel: (BOOL)allowCancel
 {
     if (self = [super initWithNibName:nil bundle:nil]) {
         _passcodeType = type;
+        _allowCancel = allowCancel;
         [self setUp];
     }
     
@@ -177,7 +178,11 @@
     
     if (!self.rightAccessoryButton && !self.cancelButton) {
         self.cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
-        [self.cancelButton setTitle:NSLocalizedString(@"cancel_button", @"") forState:UIControlStateNormal];
+        self.cancelButton.hidden = !self.allowCancel;
+        NSString *title = self.allowCancel ?
+            NSLocalizedString(@"cancel_button", @"") :
+            NSLocalizedString(@"delete_button", @"");
+        [self.cancelButton setTitle:title forState:UIControlStateNormal];
         self.cancelButton.titleLabel.font = buttonFont;
         [self.cancelButton addTarget:self action:@selector(accessoryButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
         if (isPad) {
@@ -454,8 +459,10 @@
 - (void)keypadButtonTapped
 {
     NSString *title = self.passcodeView.passcode.length > 0 ?
-    NSLocalizedString(@"delete_button", @"") :
-    NSLocalizedString(@"cancel_button", @"");
+        NSLocalizedString(@"delete_button", @"") :
+        (self.allowCancel ? NSLocalizedString(@"cancel_button", @"") : @"");
+    [self.cancelButton setHidden: self.allowCancel ?
+          false : self.passcodeView.passcode.length == 0];
     [UIView performWithoutAnimation:^{
         [self.cancelButton setTitle:title forState:UIControlStateNormal];
     }];

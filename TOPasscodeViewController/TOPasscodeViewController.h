@@ -141,8 +141,9 @@ NS_ASSUME_NONNULL_BEGIN
  Create a new instance of this view controller with the preset passcode type.
  
  @param type The type of passcode to enter (6-digit/numeric)
+ @param allowCancel Indicates whether the user is allowed to cancel
  */
-- (instancetype)initWithType:(TOPasscodeType)type;
+- (instancetype)initWithType:(TOPasscodeType)type allowCancel: (BOOL)allowCancel;
 
 /**
  Create a new instance of this view controller with the preset style and passcode type.
