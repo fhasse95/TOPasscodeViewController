@@ -293,8 +293,11 @@
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
     
-    // Update the theme style.
-    [self setStyle: self.style];
+    // Update the theme style (if necessary).
+    if (self.traitCollection.userInterfaceStyle !=
+        previousTraitCollection.userInterfaceStyle) {
+        [self setStyle: self.style];
+    }
 }
 
 #pragma mark - View Rotations -
