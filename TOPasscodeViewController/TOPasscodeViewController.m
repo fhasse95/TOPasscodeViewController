@@ -682,4 +682,22 @@
     [UIView animateWithDuration:0.4f animations:animationBlock completion:completionBlock];
 }
 
+- (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event
+{
+    for (UIPress *press in presses) {
+        
+        // Handle the pressed key.
+        if (press.key.keyCode == UIKeyboardHIDUsageKeyboardDeleteOrBackspace ||
+            press.key.characters.UTF8String == "\\u{7F}" ||
+            press.key.characters.UTF8String == "\\u{08}") {
+            [_passcodeView.inputField deleteBackward];
+        } else {
+            [_passcodeView.inputField appendPasscodeCharacters: press.key.characters animated: YES];
+        }
+        
+        // Update the view.
+        [self keypadButtonTapped];
+    }
+}
+
 @end
