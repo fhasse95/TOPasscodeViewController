@@ -478,7 +478,8 @@
     }
     
     // Validate the code
-    BOOL isCorrect = [self.delegate passcodeViewController:self isCorrectCode:passcode];
+    BOOL isCorrect = passcode.length != 0 &&
+        [self.delegate passcodeViewController:self isCorrectCode:passcode];
     if (!isCorrect) {
         [self.passcodeView resetPasscodeAnimated:YES playImpact:YES];
         return;
@@ -694,6 +695,13 @@
             press.key.characters.UTF8String == "\\u{7F}" ||
             press.key.characters.UTF8String == "\\u{08}") {
             [_passcodeView.inputField deleteBackward];
+        } else if (press.key.keyCode == UIKeyboardHIDUsageKeyboardReturnOrEnter) {
+            
+            if (_passcodeView.passcodeType == TOPasscodeTypeCustomNumeric ||
+               _passcodeView.passcodeType == TOPasscodeTypeCustomAlphanumeric) {
+                [_passcodeView.inputField submitButtonTapped: self];
+            }
+            
         } else {
             [_passcodeView.inputField appendPasscodeCharacters: press.key.characters animated: YES];
         }

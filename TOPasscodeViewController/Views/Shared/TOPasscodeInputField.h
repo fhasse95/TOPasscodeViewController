@@ -106,6 +106,9 @@ typedef NS_ENUM(NSInteger, TOPasscodeInputFieldStyle) {
 /* Animates the OK button changing location. */
 - (void)setHorizontalLayout:(BOOL)horizontalLayout animated:(BOOL)animated duration:(CGFloat)duration;
 
+/* Handles tapping the submit button */
+- (void)submitButtonTapped:(id)sender;
+
 @end
 
 NS_ASSUME_NONNULL_END
