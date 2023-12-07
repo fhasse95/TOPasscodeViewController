@@ -94,7 +94,8 @@
     
     // Add a default title view
     UIImageView *imageView = [[UIImageView alloc] initWithFrame: CGRectMake(0, 0, 55, 55)];
-    [imageView setImage: [UIImage imageNamed:@"AppIcon"]];
+    NSString *selectedIconName = [UIApplication sharedApplication].alternateIconName ?: @"AppIcon";
+    [imageView setImage: [UIImage imageNamed:selectedIconName]];
     [imageView setContentMode: UIViewContentModeScaleAspectFit];
     imageView.layer.cornerRadius = 15;
     imageView.layer.masksToBounds = YES;
