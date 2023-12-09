@@ -20,6 +20,7 @@
 //  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 //  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#import "UIWindow.h"
 #import "TOPasscodeViewController.h"
 #import "TOPasscodeView.h"
 #import "TOPasscodeViewControllerAnimatedTransitioning.h"
@@ -141,7 +142,10 @@
 
 - (UIBlurEffectStyle)blurEffectStyleForStyle:(TOPasscodeViewStyle)style
 {
-    BOOL isDark = self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    UIWindow *keyWindow = [UIWindow keyWindow];
+    BOOL isDark = keyWindow.overrideUserInterfaceStyle != UIUserInterfaceStyleLight &&
+        (keyWindow.overrideUserInterfaceStyle == UIUserInterfaceStyleDark ||
+         self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark);
     switch (isDark) {
         case YES:
             return UIBlurEffectStyleDark;
@@ -287,7 +291,10 @@
 
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
-    BOOL isDark = self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    UIWindow *keyWindow = [UIWindow keyWindow];
+    BOOL isDark = keyWindow.overrideUserInterfaceStyle != UIUserInterfaceStyleLight &&
+        (keyWindow.overrideUserInterfaceStyle == UIUserInterfaceStyleDark ||
+         self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark);
     return isDark ? UIStatusBarStyleLightContent : UIStatusBarStyleDefault;
 }
 

@@ -20,6 +20,7 @@
 //  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 //  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#import "UIWindow.h"
 #import "TOPasscodeView.h"
 #import "TOPasscodeViewContentLayout.h"
 #import "TOPasscodeCircleButton.h"
@@ -431,7 +432,10 @@
 - (void)applyThemeForStyle:(TOPasscodeViewStyle)style
 {
     BOOL isTranslucent = TOPasscodeViewStyleIsTranslucent(style);
-    BOOL isDark = self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    UIWindow *keyWindow = [UIWindow keyWindow];
+    BOOL isDark = keyWindow.overrideUserInterfaceStyle != UIUserInterfaceStyleLight &&
+        (keyWindow.overrideUserInterfaceStyle == UIUserInterfaceStyleDark ||
+         self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark);
     
     // Set title label color
     UIColor *titleLabelColor = self.titleLabelColor;
