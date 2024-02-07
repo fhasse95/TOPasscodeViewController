@@ -693,6 +693,8 @@
     [UIView animateWithDuration:0.4f animations:animationBlock completion:completionBlock];
 }
 
+#pragma mark - Keyboard support -
+
 - (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event
 {
     for (UIPress *press in presses) {
@@ -717,8 +719,6 @@
         [self keypadButtonTapped];
     }
 }
-
-// MARK: - Keyboard support
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
     if (action == @selector(paste:)) {
