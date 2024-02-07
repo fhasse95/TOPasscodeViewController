@@ -718,4 +718,18 @@
     }
 }
 
+// MARK: - Keyboard support
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+    if (action == @selector(paste:)) {
+        return YES;
+    } else {
+        return [super canPerformAction:action withSender:sender];
+    }
+}
+
+- (void)paste:(id)sender {
+    [_passcodeView.inputField setPasscode:[[UIPasteboard generalPasteboard] string]];
+}
+
 @end
