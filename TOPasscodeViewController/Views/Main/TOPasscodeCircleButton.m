@@ -120,8 +120,6 @@
 
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated
 {
-    [self.circleView setHighlighted:highlighted animated:animated];
-
     if (!self.highlightedTextColor) { return; }
 
     void (^textFadeBlock)(void) = ^{
